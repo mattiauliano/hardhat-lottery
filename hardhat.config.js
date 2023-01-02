@@ -14,5 +14,9 @@ module.exports = {
             default: 0,
             5: 0,
         },
+        player: {
+            default: 1,
+            5: 1,
+        },
     },
 };
