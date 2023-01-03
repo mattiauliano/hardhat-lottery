@@ -13,12 +13,10 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deployer } = await getNamedAccounts();
     const chainId = network.config.chainId;
 
-    let vrfCoordinatorV2Address, subscriptionId;
+    let vrfCoordinatorV2Address, vrfCoordinatorV2Mock, subscriptionId;
 
     if (developmentChains.includes(network.name)) {
-        const vrfCoordinatorV2Mock = await ethers.getContract(
-            "VRFCoordinatorV2Mock"
-        );
+        vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
         vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address;
         // Create a subId using mock
         const transactionResponse =
@@ -54,6 +52,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         log: true,
         waitConfirmations: network.config.blockConfirmations || 1,
     });
+
+    // Add Consumer to the subscriptionId
+    if (developmentChains.includes(network.name)) {
+        await vrfCoordinatorV2Mock.addConsumer(subscriptionId, raffle.address);
+
+        log("Consumer is added");
+    }
 
     // Verify contract
     if (
