@@ -1,4 +1,4 @@
-require("@nomiclabs/hardhat-waffle");
+require("@nomicfoundation/hardhat-chai-matchers");
 require("@nomiclabs/hardhat-etherscan");
 require("hardhat-deploy");
 require("solidity-coverage");
@@ -25,7 +25,7 @@ module.exports = {
             accounts: [PRIVATE_KEY],
         },
     },
-    solidity: "0.8.17",
+    solidity: "0.8.8",
     namedAccounts: {
         deployer: {
             default: 0,
@@ -35,5 +35,9 @@ module.exports = {
             default: 1,
             5: 1,
         },
+    },
+    gasReporter: {
+        enabled: false,
+        currency: "USD",
     },
 };
