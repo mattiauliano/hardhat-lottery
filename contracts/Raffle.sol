@@ -45,8 +45,8 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     constructor(
         address vrfCoordinatorV2, // Coordinator Address
-        uint256 entranceFee, // Minimum amount to enter
-        bytes32 gasLane, //
+        uint256 entranceFee,
+        bytes32 gasLane,
         uint64 subscriptionId,
         uint32 callbackGasLimit,
         uint256 interval
