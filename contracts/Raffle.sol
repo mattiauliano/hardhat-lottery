@@ -8,11 +8,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 error Raffle__NotEnoughETHEntered();
 error Raffle__TransferFailed();
 error Raffle__NotOpen();
-error Raffle__RaffleNotNeeded(
-    uint256 currentBalance,
-    uint256 numPlayers,
-    uint256 raffleState
-);
+error Raffle__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 raffleState);
 
 contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     /* Type declarations */
@@ -40,7 +36,6 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     /* Events */
     event RaffleEnter(address indexed player);
-    event RequestedRaffleWinner(uint256 indexed requestId);
     event WinnerPicked(address indexed winner);
 
     constructor(
@@ -82,11 +77,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
     // Chainlink Keeper nodes call this. They look for the 'upkeepNeeded' to return true.
     function checkUpkeep(
         bytes memory /*checkData*/
-    )
-        public
-        override
-        returns (bool upkeepNeeded, bytes memory /* performData */)
-    {
+    ) public override returns (bool upkeepNeeded, bytes memory /* performData */) {
         bool isOpen = (RaffleState.OPEN == s_raffleState);
         bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_interval);
         bool hasPlayers = (s_players.length > 0);
@@ -100,7 +91,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
         //
         (bool upkeepNeeded, ) = checkUpkeep("");
         if (!upkeepNeeded) {
-            revert Raffle__RaffleNotNeeded(
+            revert Raffle__UpkeepNotNeeded(
                 address(this).balance,
                 s_players.length,
                 uint256(s_raffleState)
@@ -118,8 +109,6 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
             i_callbackGasLimit, // Sets a limit to avoid spending to much gas
             NUM_WORDS // How many random number we want
         ); // Returns a request id
-
-        emit RequestedRaffleWinner(requestId);
     }
 
     // Once get it, do something with it
