@@ -103,7 +103,7 @@ const { assert, expect } = require("chai");
 
               it("returns false if enough time hasn't passed", async () => {
                   await raffle.enterRaffle({ value: raffleEntranceFee });
-                  await network.provider.send("evm_increaseTime", [interval.toNumber() - 5]); // use a higher number here if this test fails
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() - 5]);
                   await network.provider.request({ method: "evm_mine", params: [] });
                   const { upkeepNeeded } = await raffle.callStatic.checkUpkeep("0x"); // upkeepNeeded = (timePassed && isOpen && hasBalance && hasPlayers)
                   assert(!upkeepNeeded);
@@ -115,6 +115,45 @@ const { assert, expect } = require("chai");
                   await network.provider.request({ method: "evm_mine", params: [] });
                   const { upkeepNeeded } = await raffle.callStatic.checkUpkeep("0x"); // upkeepNeeded = (timePassed && isOpen && hasBalance && hasPlayers)
                   assert(upkeepNeeded);
+              });
+          });
+
+          describe("performUpkeep", () => {
+              it("can only run if checkUpkeep is true", async () => {
+                  await raffle.enterRaffle({ value: raffleEntranceFee });
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1]);
+                  await network.provider.request({ method: "evm_mine", params: [] });
+                  const tx = await raffle.performUpkeep([]);
+                  assert(tx);
+              });
+
+              it("reverts when checkUpkeep is false", async () => {
+                  await expect(raffle.performUpkeep([])).to.be.revertedWithCustomError(
+                      raffle,
+                      "Raffle__UpkeepNotNeeded"
+                  );
+              });
+
+              it("emits and event", async () => {
+                  await raffle.enterRaffle({ value: raffleEntranceFee });
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1]);
+                  await network.provider.request({ method: "evm_mine", params: [] });
+                  const txResponse = await raffle.performUpkeep([]);
+                  const txReceipt = await txResponse.wait(1);
+                  // This event is emitted by vrfCoordinator contract
+                  const requestId = vrfCoordinatorV2Mock.interface.parseLog(txReceipt.events[0])
+                      .args.requestId;
+                  assert(requestId.toNumber() > 0);
+              });
+
+              it("updates the raffle state to 'calculating'", async () => {
+                  await raffle.enterRaffle({ value: raffleEntranceFee });
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1]);
+                  await network.provider.request({ method: "evm_mine", params: [] });
+                  await raffle.performUpkeep([]);
+
+                  const raffleState = await raffle.getRaffleState();
+                  assert(raffleState.toString() === "1");
               });
           });
 
