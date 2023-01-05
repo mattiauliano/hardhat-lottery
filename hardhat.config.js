@@ -40,4 +40,7 @@ module.exports = {
         enabled: false,
         currency: "USD",
     },
+    mocha: {
+        timeout: 200000,
+    },
 };
