@@ -102,9 +102,7 @@ Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription 
 
 [You can follow the documentation if you get lost.](https://docs.chain.link/docs/chainlink-keepers/compatible-contracts/)
 
-Go to [keepers.chain.link](https://keepers.chain.link/new) and register a new upkeep. Choose `Custom logic` as your trigger mechanism for automation. Your UI will look something like this once completed:
-
-![Keepers](./img/keepers.png)
+Go to [keepers.chain.link](https://keepers.chain.link/new) and register a new upkeep. Choose `Custom logic` as your trigger mechanism for automation.
 
 6. Enter your raffle!
 
